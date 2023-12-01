@@ -23,6 +23,95 @@ namespace Tree
         }
 
 
+        public void Removed(int key)
+        {
+            //找删除key的节点
+            Node removed = Find(key);
+            if (removed == null)
+            {
+                return;
+            }
+
+            //递归删除
+            this.DoRemoved(removed);
+
+        }
+
+        private void DoRemoved(Node node)
+        {
+
+        }
+
+
+        /// <summary>
+        /// 查找剩余替换节点
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public Node FindReplaced(Node node)
+        {
+            //1.没有孩子
+            //2.只有左孩子
+            //3.只有右孩子
+            //4.左右都有孩子
+
+
+            if (node.left == null && node.right == null)
+            {
+                return null;
+            }
+
+            if (node.left == null)
+            {
+                return node.right;
+            }
+
+            if (node.right == null)
+            {
+                return node.left;
+            }
+
+            //找后继节点
+            Node temp = node.right;
+            while (temp.left != null)
+            {
+                temp = temp.left;
+            }
+
+            return temp;
+        }
+
+
+        /// <summary>
+        /// 查找节点
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public Node Find(int key)
+        {
+            Node temp = root;
+
+            while (temp != null)
+            {
+                if (key < temp.key)
+                {
+                    temp = temp.left;
+                }
+                else if (key > temp.key)
+                {
+                    temp = temp.right;
+                }
+                else
+                {
+                    return temp;
+                }
+            }
+
+            return null;
+        }
+
+
+
         /// <summary>
         /// 新增或更新
         /// </summary>
