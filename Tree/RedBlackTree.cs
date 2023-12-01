@@ -12,20 +12,144 @@ namespace Tree
 
         Node root;
 
-        public bool isRed(Node node)
+        public bool IsRed(Node node)
         {
             return node != null && node.color == Color.RED;
         }
 
-        public bool isBlack(Node node)
+        public bool IsBlack(Node node)
         {
             return node == null || node.color == Color.BLACK;
         }
 
+
+        /// <summary>
+        /// 新增或更新
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        public void Put(int key, object value)
+        {
+            Node temp = root;
+            Node parent = null; //记录找节点退出时的最后一个节点
+
+            //先找到合适的位置
+            while (temp != null)
+            {
+                parent = temp;
+                if (key < temp.key)
+                {
+                    temp = temp.left;
+                }
+                else if (key > temp.key)
+                {
+                    temp = temp.right;
+                }
+                else
+                {
+                    temp.value = value;
+                    return;
+                }
+            }
+
+            //没找到key，就新增，插入parent节点下
+            Node inserted = new Node(key, value);
+
+            if (parent == null)
+            {
+                root = inserted;
+            }
+            else if (key < parent.key)
+            {
+                parent.left = inserted;
+                inserted.parent = parent;
+            }
+            else if (key > parent.key)
+            {
+                parent.right = inserted;
+                inserted.parent = parent;
+            }
+
+        }
+
+
+        /// <summary>
+        /// 修复相邻的红色节点
+        /// </summary>
+        /// <param name="node"></param>
+        public void RepairAdjacentRedNodes(Node node)
+        {
+            /***
+             * 1.插入的节点为根节点
+             * 2.插入节点父亲是黑色，无需调整
+             * 3.红红相邻，叔叔为红
+             * 4.红红相邻，叔叔为黑
+             * 
+             */
+
+            if (node == root)
+            {
+                node.color = Color.BLACK;
+                return;
+            }
+
+            if (IsBlack(node.parent))
+            {
+                return;
+            }
+
+            Node parent = node.parent;
+            Node uncle = node.GetUncleNode();
+            Node grandParent = parent.parent;
+
+            if (IsRed(uncle))
+            {
+                parent.color = Color.BLACK;
+                uncle.color = Color.BLACK;
+                grandParent.color = Color.RED;
+
+                RepairAdjacentRedNodes(grandParent);
+                return;
+            }
+
+            //LL
+            if (parent.IsLeftChild() && node.IsLeftChild())
+            {
+                parent.color = Color.BLACK;
+                grandParent.color = Color.RED;
+                this.RightRotate(grandParent);
+            }
+            //LR
+            else if (parent.IsLeftChild() && !node.IsLeftChild())
+            {
+                LeftRotate(parent);
+                node.color = Color.BLACK;
+                grandParent.color = Color.RED;
+                this.RightRotate(grandParent);
+            }
+            //RR
+            else if (!parent.IsLeftChild() && !node.IsLeftChild())
+            {
+                parent.color = Color.BLACK;
+                grandParent.color = Color.RED;
+                this.LeftRotate(grandParent);
+            }
+            //RL
+            else
+            {
+                RightRotate(parent);
+                node.color = Color.BLACK;
+                grandParent.color = Color.RED;
+                this.LeftRotate(grandParent);
+            }
+        }
+
+
+
         /// <summary>
         /// 右旋
         /// </summary>
-        public void rightRotate(Node node)
+        public void RightRotate(Node node)
         {
             Node currentParent = node.parent;
             Node futureParent = node.left;
@@ -59,13 +183,13 @@ namespace Tree
         /// <summary>
         /// 左旋
         /// </summary>
-        public void leftRotate(Node node)
+        public void LeftRotate(Node node)
         {
             Node currentParen = node.parent;
             Node futureParent = node.right;
             Node futureGrandson = futureParent.left;
 
-            if(futureGrandson != null)
+            if (futureGrandson != null)
             {
                 futureGrandson.parent = node;
             }
